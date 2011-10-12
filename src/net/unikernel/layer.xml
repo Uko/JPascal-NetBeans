@@ -3,7 +3,7 @@
 <filesystem>
     <folder name="Loaders">
         <folder name="text">
-            <folder name="x-simplejava">
+            <folder name="x-pascal">
                 <folder name="Actions">
                     <file name="org-openide-actions-CopyAction.shadow">
                         <attr name="originalFile" stringvalue="Actions/Edit/org-openide-actions-CopyAction.instance"/>
@@ -64,10 +64,10 @@
                 </folder>
                 <folder name="Factories">
                     <file name="PasDataLoader.instance">
-                        <attr name="SystemFileSystem.icon" urlvalue="nbresloc:/net/unikernel/gnome_mime_text_x_pascal.png"/>
                         <attr name="dataObjectClass" stringvalue="net.unikernel.PasDataObject"/>
+                        <attr name="iconBase" stringvalue="net/unikernel/gnome_mime_text_x_pascal.png"/>
                         <attr name="instanceCreate" methodvalue="org.openide.loaders.DataLoaderPool.factory"/>
-                        <attr name="mimeType" stringvalue="text/x-simplejava"/>
+                        <attr name="mimeType" stringvalue="text/x-pascal"/>
                     </file>
                 </folder>
             </folder>
@@ -88,4 +88,32 @@
             </file>
         </folder>
     </folder>
+	<folder name="Editors">
+		<folder name="text">
+			<folder name="x-pascal">
+				<file name="org-netbeans-modules-editor-NbEditorKit.instance"/>
+				<file name="language.instance">
+					<attr name="instanceCreate" methodvalue="net.unikernel.lexer.JPTokenId.getLanguage"/>
+					<attr name="instanceOf" stringvalue="org.netbeans.api.lexer.Language"/>
+				</file>
+				<attr name="SystemFileSystem.localizingBundle" stringvalue="net.unikernel.Bundle"/>
+				<folder name="FontsColors">
+					<folder name="NetBeans">
+						<folder name="Defaults">
+							<file name="FontAndColors.xml" url="FontAndColors.xml">
+								<attr name="SystemFileSystem.localizingBundle" stringvalue="net.unikernel.Bundle"/>
+							</file>
+						</folder>
+					</folder>
+				</folder>
+			</folder>
+		</folder>
+	</folder>
+	<folder name="OptionsDialog">
+		<folder name="PreviewExamples">
+			<folder name="text">
+				<file name="x-pascal" url="PasTemplate.pas"/>
+			</folder>
+		</folder>
+	</folder>
 </filesystem>

@@ -1,0 +1,81 @@
+options {
+	JAVA_UNICODE_ESCAPE = true;
+	ERROR_REPORTING = false;
+	STATIC = false;
+	JDK_VERSION = "1.5";
+	BUILD_PARSER = false;
+}
+
+PARSER_BEGIN(Pascal)
+
+package net.unikernel.jcclexer;
+
+/**
+ * Grammar to parse Pascal
+ * @author BUM
+ */
+public class Pascal {}
+
+PARSER_END(Pascal)
+
+/* WHITE SPACE */
+TOKEN:
+{
+	< WHITESPACE: " " | "\t" | "\n" | "\r" | "\f">
+}
+
+/* COMMENTS */
+TOKEN:
+{
+	<MULTI_LINE_COMMENT:"{"(~["*"])*"}">
+	| <MULTI:"(""*"(~["*"])*"*"")">
+}
+
+/* SEPARATORS */
+TOKEN :
+{
+	< LPAREN: "(" >
+	| < RPAREN: ")" >
+	| < COLON: ":" >
+	| < SEMICOLON: ";" >
+	| < DOT: "." >
+	| < COMMA:",">
+}
+
+/* OPERATORS */
+TOKEN:
+{
+	<PLUS:"+">
+	| <MINUS:"-">
+	| <MULTIPLY:"*">
+	| <DIVIDE:"/">
+	| <ASSIGN: <COLON>"=">
+}
+
+/* KEYWORDS */
+TOKEN:
+{
+	<PROGRAM:"program">
+	| <VAR:"var">
+	| <INTEGER:"integer">
+	| <REAL:"real">
+	| <BEGIN:"begin">
+	| <END:"end">
+	| <FOR:"for">
+	| <TO:"to">
+	| <DOWNTO:"downto">
+	| <WRITE:"write">
+	| <WRITELN:"writeln">
+	| <READ:"read">
+	| <READLN:"readln">
+}
+
+/* IDENTIFICATOR AND LITERALS */
+TOKEN:
+{
+	<ID: <LETTER>(<LETTER>|<DIGIT>)*>
+	| <LETTER:(["A"-"Z","a"-"z"])+>
+	| <DIGIT:["0"-"9"]>
+	| <DIGITS:(<DIGIT>)+>
+	| <SIGN:["+", "-"]>
+}
