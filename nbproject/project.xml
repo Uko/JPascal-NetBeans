@@ -99,6 +99,14 @@
                 </dependency>
             </module-dependencies>
             <public-packages/>
+            <class-path-extension>
+                <runtime-relative-path>ext/asm-commons-4.0.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/asm-commons-4.0.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/asm-4.0.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/asm-4.0.jar</binary-origin>
+            </class-path-extension>
         </data>
     </configuration>
 </project>
