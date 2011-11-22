@@ -6,6 +6,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.event.ChangeListener;
 import net.unikernel.jccparser.PascalParser;
+import net.unikernel.jccparser.SimpleNode;
 import org.netbeans.modules.parsing.api.Snapshot;
 import org.netbeans.modules.parsing.api.Task;
 import org.netbeans.modules.parsing.spi.Parser;
@@ -28,7 +29,9 @@ public class JPParser extends Parser
 		pascalParser = new PascalParser(reader);
 		try
 		{
-			pascalParser.parse();
+			SimpleNode node = pascalParser.parse();
+//DEBUG
+			node.dump("");
 		}
 		catch (net.unikernel.jccparser.ParseException ex)
 		{

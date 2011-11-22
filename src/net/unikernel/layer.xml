@@ -108,6 +108,7 @@
 				</folder>
 				
 				<file name="net-unikernel-parser-JPParserFactory.instance"/>
+				<file name="net-unikernel-parser-SyntaxErrorsHighlightingTaskFactory.instance"/>
 			</folder>
 		</folder>
 	</folder>

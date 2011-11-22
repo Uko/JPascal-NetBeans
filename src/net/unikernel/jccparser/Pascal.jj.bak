@@ -1,0 +1,177 @@
+options {
+	JAVA_UNICODE_ESCAPE = true;
+	ERROR_REPORTING = true;
+	STATIC = false;
+	JDK_VERSION = "1.5";
+}
+
+PARSER_BEGIN(PascalParser)
+
+package net.unikernel.jccparser;
+
+public class PascalParser
+{
+	public java.util.List<ParseException> syntaxErrors =
+		new java.util.ArrayList<ParseException> ();
+
+	void recover (ParseException ex, int recoveryPoint)
+	{
+		syntaxErrors.add (ex);
+		Token t;
+		do
+		{
+			t = getNextToken();
+		}
+		while (t.kind != EOF && t.kind != recoveryPoint);
+	}
+}
+
+PARSER_END(PascalParser)
+
+/* WHITE SPACE */
+SKIP:
+{
+	< WHITESPACE: " " | "\t" | "\n" | "\r" | "\f">
+}
+
+/* COMMENTS */
+TOKEN:
+{
+	<MULTI_LINE_COMMENT:"{"(~["*"])*"}">
+	| <MULTI:"(""*"(~["*"])*"*"")">
+}
+
+/* SEPARATORS */
+TOKEN :
+{
+	< LPAREN: "(" >
+	| < RPAREN: ")" >
+	| < COLON: ":" >
+	| < SEMICOLON: ";" >
+	| < DOT: "." >
+	| < COMMA:",">
+}
+
+/* OPERATORS */
+TOKEN:
+{
+	<PLUS:"+">
+	| <MINUS:"-">
+	| <MULTIPLY:"*">
+	| <DIVIDE:"/">
+        | <DIV:"div">
+	| <ASSIGN: <COLON>"=">
+}
+
+/* KEYWORDS */
+TOKEN:
+{
+	<PROGRAM:"program">
+	| <VAR:"var">
+	| <INTEGER:"integer">
+	| <REAL:"real">
+	| <BEGIN:"begin">
+	| <END:"end">
+	| <FOR:"for">
+	| <TO:"to">
+        | <DO:"do">
+	| <DOWNTO:"downto">
+	| <WRITE:"write">
+	| <WRITELN:"writeln">
+	| <READ:"read">
+	| <READLN:"readln">
+}
+
+/* IDENTIFICATOR AND LITERALS */
+TOKEN:
+{
+	<ID: <LETTER>(<LETTER>|<DIGIT>)*>
+	| <LETTER:(["A"-"Z","a"-"z"])+>
+        | <NUMBER: (<DIGIT>)+ ("."(<DIGIT>)+ )* >
+	| <DIGIT:["0"-"9"]>
+	| <DIGITS:(<DIGIT>)+>
+	| <SIGN:["+", "-"]>
+}
+
+
+
+/* PARSER STARTS HERE */
+
+/*every proram ends with EOF*/
+void parse() :
+{
+}
+{
+	try
+	{
+		prog()
+		<EOF>
+	}
+	catch(ParseException ex)
+	{
+		recover (ex, SEMICOLON);
+	}
+}
+
+/*all program structure*/
+void prog() : {}
+{
+    <PROGRAM> <ID> <SEMICOLON> (<VAR> var_list())* <BEGIN> (stmt_list())* <END> <DOT>
+}
+
+/*var body */
+void var_list() : {}
+{
+    (id_list() <COLON> type() <SEMICOLON>)+
+}
+
+/*types*/
+void type() : {}
+{
+    <INTEGER> | <REAL>
+}
+
+/* ids seperated by comma (for initialization for example) */
+void id_list() : {}
+{
+    <ID> (<COMMA> id_list())*
+}
+
+/*list of statements */
+void stmt_list() : {}
+{
+    (stmt() <SEMICOLON>)+
+}
+
+/*statement (shit that ends with semicolon)*/
+void stmt() : {}
+{
+    (<ID> <ASSIGN> exp())
+    |((<WRITE>|<WRITELN>) <LPAREN> exp() <RPAREN> )
+    |((<READ>|<READLN>) <LPAREN> id_list() <RPAREN> )
+    |(<FOR> for_index_exp() <DO> body())
+}
+
+/* variable or numeric value */
+void numeric_val() : {}
+{
+    <NUMBER>|<ID>
+}
+
+/* simple expression with binary operator */
+void exp() : {}
+{
+    numeric_val() ((<PLUS>|<MINUS>|<MULTIPLY>|<DIVIDE>|<DIV>) numeric_val())?
+}
+
+/*expression for "for" loop */
+void for_index_exp() : {}
+{
+    <ID> <ASSIGN> exp() <TO> exp()
+}
+
+/*Body for some loops and other stuff (begin ... end) */
+void body() : {}
+{
+    <BEGIN> stmt_list() <END>
+}
