@@ -1,0 +1,230 @@
+options {
+	JAVA_UNICODE_ESCAPE = true;
+	ERROR_REPORTING = true;
+	STATIC = false;
+	JDK_VERSION = "1.5";
+}
+
+PARSER_BEGIN(PascalParser)
+
+package net.unikernel.jcctranslator;
+
+public class PascalParser
+{
+	
+}
+
+PARSER_END(PascalParser)
+
+/* WHITE SPACE */
+SKIP:
+{
+	< WHITESPACE: " " | "\t" | "\n" | "\r" | "\f">
+}
+
+/* COMMENTS */
+TOKEN:
+{
+	<MULTI_LINE_COMMENT:"{"(~["*"])*"}">
+	| <MULTI:"(""*"(~["*"])*"*"")">
+}
+
+/* SEPARATORS */
+TOKEN :
+{
+	< LPAREN: "(" >
+	| < RPAREN: ")" >
+	| < COLON: ":" >
+	| < SEMICOLON: ";" >
+	| < DOT: "." >
+	| < COMMA:",">
+}
+
+/* OPERATORS */
+TOKEN:
+{
+	<PLUS:"+">
+	| <MINUS:"-">
+	| <MULTIPLY:"*">
+	| <DIVIDE:"/">
+        | <DIV:"div">
+	| <ASSIGN: <COLON>"=">
+}
+
+/* KEYWORDS */
+TOKEN:
+{
+	<PROGRAM:"program">
+	| <VAR:"var">
+	| <INTEGER:"integer">
+	| <REAL:"real">
+	| <BEGIN:"begin">
+	| <END:"end">
+	| <FOR:"for">
+	| <TO:"to">
+        | <DO:"do">
+	| <DOWNTO:"downto">
+	| <WRITE:"write">
+	| <WRITELN:"writeln">
+	| <READ:"read">
+	| <READLN:"readln">
+}
+
+/* IDENTIFICATOR AND LITERALS */
+TOKEN:
+{
+	<ID: <LETTER>(<LETTER>|<DIGIT>)*>
+	| <LETTER:(["A"-"Z","a"-"z"])+>
+    | <NUMBER: (<DIGIT>)+ ("."(<DIGIT>)+ )*>
+	| <DIGIT:["0"-"9"]>
+	| <DIGITS:(<DIGIT>)+>
+	| <SIGN:["+", "-"]>
+}
+
+
+
+/* PARSER STARTS HERE */
+
+/*every proram ends with EOF*/
+String parse() :
+{
+    String res="";
+}
+{
+	try
+	{
+ 		res = prog()
+		<EOF>
+                {return res;}
+	}
+	catch(ParseException ex)
+	{
+		
+	}
+}
+
+/*all program structure*/
+String prog() : 
+{
+    String v_list="";
+    String s_list="";
+}
+{
+    <PROGRAM> <ID> <SEMICOLON> 
+        (<VAR> v_list = var_list())* 
+    <BEGIN> 
+        (s_list = stmt_list())* 
+    <END> <DOT>
+
+    {return v_list + "{\n" + s_list + "}";}
+}
+
+/*var body */
+String var_list() : 
+{
+    String i_list = "";
+    String tp = "";
+}
+{
+    (i_list = id_list() <COLON> tp = type() <SEMICOLON>)+
+    {return tp + " " + i_list + " = 0;\n";}
+}
+
+/*types*/
+String type() : 
+{
+    Token t = new Token();
+}
+{
+    (t = <INTEGER> | t = <REAL>)
+    {
+        if (t.toString().toLowerCase().equals("integer"))
+            return "int";
+        else
+            return "double";
+    }
+}
+
+/* ids seperated by comma (for initialization for example) */
+String id_list() : 
+{
+    String i_list = "";
+    Token cma = null;
+    Token id = new Token();
+}
+{
+    id = <ID> (cma = <COMMA> i_list = id_list())*
+    {return id.toString()+((cma!=null)?cma.toString():"")+i_list;}
+}
+
+/*list of statements */
+String stmt_list() : 
+{
+    String stm = "";
+    String res = "";
+}
+{
+    (stm = stmt() {res+=stm+";\n";} <SEMICOLON>)+
+    {return res;}
+}
+
+/*statement (shit that ends with semicolon)*/
+String stmt() : 
+{
+    Token t1 = null;
+    Token t2 = null;
+    String res = "";
+    String bdy = "";
+}
+{
+     ((t1 = <ID> <ASSIGN>              res = exp()          {return t1.toString()+" = " + res;})
+    |((t1 = <WRITE>| t1 = <WRITELN>) <LPAREN> res = exp() <RPAREN> {return "System.out.print"+(t1.toString().equals("write")?"":"ln")+"("+ res +")";})
+    |((t1 = <READ>| t1 = <READLN>) <LPAREN> res = id_list() <RPAREN> {return "System.out.read"+(t1.toString().equals("read")?"":"ln")+"("+ res +")";})
+    |(<FOR> res = for_index_exp() <DO> bdy = body() {return "for("+res+")\n"+bdy;}))
+
+    {throw new Error("Couldnt find any statement for translation.");}
+}
+
+/* variable or numeric value */
+String numeric_val() : 
+{
+    Token t = null;
+}
+{
+    (t = <NUMBER>|t = <ID>)
+    {return t.toString();}
+}
+
+/* simple expression with binary operator */
+String exp() : 
+{
+    Token op = null;
+    String s1 = "";
+    String s2 = "";
+}
+{
+    s1 = numeric_val() ((op = <PLUS>| op = <MINUS>| op = <MULTIPLY>| op = <DIVIDE>| op = <DIV>) s2 = numeric_val(){return s1 + " " + op.toString() + " " + s2;})?
+    {return s1;}
+}
+
+/*expression for "for" loop */
+String for_index_exp() : 
+{
+    Token id = null;
+    String xp1 = "";
+    String xp2 = "";
+}
+{
+    id = <ID> <ASSIGN> xp1 = exp() <TO> xp2 = exp()
+    {return id.toString() + " = " + xp1 + ";" + id.toString() + "<" + xp2 + ";" + id.toString() + "++";}
+}
+
+/*Body for some loops and other stuff (begin ... end) */
+String body() : 
+{
+    String s="";
+}
+{
+    <BEGIN> s = stmt_list() <END>
+    {return "{\n" + s + "}";}
+}

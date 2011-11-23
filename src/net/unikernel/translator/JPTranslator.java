@@ -1,22 +1,22 @@
-package net.unikernel.parser;
+package net.unikernel.translator;
 
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.event.ChangeListener;
-import net.unikernel.jccparser.PascalParser;
-import net.unikernel.jccparser.SimpleNode;
+import net.unikernel.jcctranslator.PascalParser;
 import org.netbeans.modules.parsing.api.Snapshot;
 import org.netbeans.modules.parsing.api.Task;
 import org.netbeans.modules.parsing.spi.Parser;
 import org.netbeans.modules.parsing.spi.SourceModificationEvent;
+import org.openide.windows.IOProvider;
 
 /**
  *
  * @author mcangel
  */
-public class JPParser extends Parser
+public class JPTranslator extends Parser
 {
 	private Snapshot snapshot;
 	private PascalParser pascalParser;
@@ -26,30 +26,30 @@ public class JPParser extends Parser
 	{
 		this.snapshot = snapshot;
 		Reader reader = new StringReader(snapshot.getText().toString());
-		if(pascalParser == null)
+		if (pascalParser == null)
 		{
 			pascalParser = new PascalParser(reader);
 		}
 		else
 		{
-			PascalParser.ReInit(reader);
+			pascalParser.ReInit(reader);
 		}
 		try
 		{
-			SimpleNode node = pascalParser.parse();
 //DEBUG
-			node.dump("");
+			IOProvider.getDefault().getStdOut().println("Translated code:");
+			IOProvider.getDefault().getStdOut().println(pascalParser.parse());
 		}
-		catch (net.unikernel.jccparser.ParseException ex)
+		catch (net.unikernel.jcctranslator.ParseException ex)
 		{
-			Logger.getLogger(JPParser.class.getName()).log(Level.WARNING, null, ex);
+			Logger.getLogger(JPTranslator.class.getName()).log(Level.WARNING, null, ex);
 		}
 	}
 
 	@Override
 	public Result getResult(Task task)
 	{
-		return new JPParserResult(snapshot, pascalParser);
+		return new JPTranslatorResult(snapshot, pascalParser);
 	}
 
 	@Override
@@ -62,12 +62,12 @@ public class JPParser extends Parser
 	{
 	}
 
-	public static class JPParserResult extends Result
+	public static class JPTranslatorResult extends Result
 	{
 		private PascalParser pascalParser;
 		private boolean valid = true;
 
-		JPParserResult(Snapshot snapshot, PascalParser pascalParser)
+		JPTranslatorResult(Snapshot snapshot, PascalParser pascalParser)
 		{
 			super(snapshot);
 			this.pascalParser = pascalParser;
